@@ -589,7 +589,8 @@ function refreshUI(){
     const b = document.getElementById('cb'+id);
     if(b){ b.textContent='✓ Joined'; b.classList.add('done'); }
   });
-  document.getElementById('claimBtn').classList.toggle('active', joined.length>=3);
+  const cb = document.getElementById('claimBtn');
+  if(cb) cb.classList.toggle('active', joined.length>=3);
 }
 refreshUI();
 
@@ -739,6 +740,12 @@ function closeResult(){
   cupPos={1:0,2:1,3:2};
   gamePhase='idle';
   busy=false;
+  // Reset prize labels back to original
+  const origPrizes = {1:'₹50', 2:'₹500', 3:'₹100'};
+  [1,2,3].forEach(n=>{
+    const p = document.querySelector('#cw'+n+' .cup-prize');
+    if(p) p.textContent = origPrizes[n];
+  });
   const hint=document.querySelector('.tap-hint');
   if(hint){ hint.textContent='👆 Tap any cup to play'; hint.style.opacity=''; }
 }
@@ -834,7 +841,8 @@ function renderChannelPopup(){
       </div>
       <button class="ch-btn ${joined.includes(i)?'done':''}" id="cb${i}">${joined.includes(i)?'✓ Joined':'Join'}</button>
     </div>`).join('');
-  document.getElementById('claimBtn').classList.toggle('active', joined.length>=3);
+  const cb = document.getElementById('claimBtn');
+  if(cb) cb.classList.toggle('active', joined.length>=3);
 }
 
 // ── BACKGROUND TIMER VERIFICATION (5 sec) ──
