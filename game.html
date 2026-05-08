@@ -506,7 +506,7 @@ body{
 <!-- ═══ FREE POINTS POPUP ═══ -->
 <div id="freePopup">
   <div class="popup-sheet">
-    <div class="popup-handle"></div>
+    <div class="popup-handle" onclick="closePopup()" style="width:60px;height:6px;background:rgba(255,255,255,.2);border-radius:4px;margin:0 auto 18px;cursor:pointer;padding:10px 0;background-clip:content-box;"></div>
     <div class="popup-title">🎁 Get Free Points</div>
     <div class="popup-sub">Join <span>3 channels</span> to get free points!</div>
     <div class="ch-list" id="chList"></div>
@@ -886,50 +886,22 @@ document.addEventListener('visibilitychange', ()=>{
   }
 });
 
-// ── SWIPE DOWN TO CLOSE FREE POPUP ──
-function initSwipeClose(){
+// ── CLOSE FREE POPUP ──
+function closePopup(){
   const popup = document.getElementById('freePopup');
   const sheet = popup.querySelector('.popup-sheet');
-  let startY = 0, curY = 0, active = false;
-
-  const onStart = e => {
-    startY = (e.touches||[e])[0].clientY;
-    curY = startY;
-    active = true;
-    sheet.style.transition = 'none';
-  };
-  const onMove = e => {
-    if(!active) return;
-    curY = (e.touches||[e])[0].clientY;
-    const dy = curY - startY;
-    if(dy > 0){ sheet.style.transform = `translateY(${dy}px)`; }
-  };
-  const onEnd = () => {
-    if(!active) return;
-    active = false;
-    const dy = curY - startY;
-    sheet.style.transition = 'transform 0.3s ease';
-    if(dy > 60){
-      sheet.style.transform = `translateY(100%)`;
-      setTimeout(()=>{
-        popup.classList.remove('show');
-        sheet.style.transform = '';
-        sheet.style.transition = '';
-      }, 300);
-    } else {
-      sheet.style.transform = '';
-      setTimeout(()=>{ sheet.style.transition = ''; }, 300);
-    }
-  };
-
-  sheet.addEventListener('touchstart', onStart, {passive:true});
-  sheet.addEventListener('touchmove',  onMove,  {passive:true});
-  sheet.addEventListener('touchend',   onEnd,   {passive:true});
-
-  // Also close on backdrop tap
-  popup.addEventListener('click', e=>{ if(e.target===popup) onEnd.call(null, {changedTouches:[{clientY: startY+100}]}); });
+  sheet.style.transition = 'transform 0.35s ease';
+  sheet.style.transform = 'translateY(100%)';
+  setTimeout(()=>{
+    popup.classList.remove('show');
+    sheet.style.transform = '';
+    sheet.style.transition = '';
+  }, 350);
 }
-initSwipeClose();
+// Tap backdrop to close
+document.getElementById('freePopup').addEventListener('click', e=>{
+  if(e.target === document.getElementById('freePopup')) closePopup();
+});
 </script>
 </body>
 </html>
