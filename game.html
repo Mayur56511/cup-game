@@ -580,7 +580,8 @@ let busy = false;
 function save(){ localStorage.setItem('pts',pts); localStorage.setItem('bal',bal); localStorage.setItem('joined',JSON.stringify(joined)); localStorage.setItem('spinCount',spinCount); localStorage.setItem('channelBatch',channelBatch); }
 
 function refreshUI(){
-  document.getElementById('balAmt').textContent = '₹'+bal;
+  const balEl = document.getElementById('balAmt');
+  if(balEl) balEl.textContent = '₹'+bal;
   const bpEl = document.getElementById('balPts'); if(bpEl) bpEl.textContent = '🎯 '+pts+(pts===1?' Point':' Points')+' Available';
   document.getElementById('ptsVal').textContent = pts;
   joined.forEach(id=>{
@@ -796,21 +797,20 @@ let channelBatches = [
 ];
 
 // ─── FIREBASE ───
-const fbApp = firebase.initializeApp({
-  databaseURL: "https://jaiclub-data-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
-const db = firebase.database();
-
-// Track visit
-db.ref('cupGame/stats/visits').transaction(v => (v||0)+1);
-
-// Fetch channels from Firebase (admin updates these)
-db.ref('cupGame/channels').once('value').then(snap => {
-  const data = snap.val();
-  if(data && data.set0 && data.set1 && data.set2) {
-    channelBatches = [data.set0, data.set1, data.set2];
-  }
-});
+let db = null;
+try {
+  const fbApp = firebase.initializeApp({
+    databaseURL: "https://jaiclub-data-default-rtdb.asia-southeast1.firebasedatabase.app"
+  });
+  db = firebase.database();
+  db.ref('cupGame/stats/visits').transaction(v => (v||0)+1);
+  db.ref('cupGame/channels').once('value').then(snap => {
+    const data = snap.val();
+    if(data && data.set0 && data.set1 && data.set2){
+      channelBatches = [data.set0, data.set1, data.set2];
+    }
+  }).catch(()=>{});
+} catch(e){ console.warn('Firebase unavailable:', e); }
 
 // ─── FREE POINTS ───
 function openFreePopup(){
@@ -935,7 +935,7 @@ function toast(msg){
 // Track if user leaves without completing game
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden && gamePhase === 'picking'){
-    db.ref('cupGame/stats/abandons').transaction(v=>(v||0)+1);
+    if(db) db.ref('cupGame/stats/abandons').transaction(v=>(v||0)+1);
   }
 });
 </script>
