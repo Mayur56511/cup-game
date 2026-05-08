@@ -887,31 +887,49 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 // ── SWIPE DOWN TO CLOSE FREE POPUP ──
-(function(){
+function initSwipeClose(){
   const popup = document.getElementById('freePopup');
-  const sheet = popup?.querySelector('.popup-sheet');
-  if(!sheet) return;
-  let startY=0, isDragging=false;
-  sheet.addEventListener('touchstart', e=>{
-    startY = e.touches[0].clientY;
-    isDragging = true;
+  const sheet = popup.querySelector('.popup-sheet');
+  let startY = 0, curY = 0, active = false;
+
+  const onStart = e => {
+    startY = (e.touches||[e])[0].clientY;
+    curY = startY;
+    active = true;
     sheet.style.transition = 'none';
-  }, {passive:true});
-  sheet.addEventListener('touchmove', e=>{
-    if(!isDragging) return;
-    const dy = e.touches[0].clientY - startY;
-    if(dy > 0) sheet.style.transform = `translateY(${dy}px)`;
-  }, {passive:true});
-  sheet.addEventListener('touchend', e=>{
-    isDragging = false;
-    const dy = e.changedTouches[0].clientY - startY;
-    sheet.style.transition = '';
-    sheet.style.transform = '';
-    if(dy > 80){
-      popup.classList.remove('show');
+  };
+  const onMove = e => {
+    if(!active) return;
+    curY = (e.touches||[e])[0].clientY;
+    const dy = curY - startY;
+    if(dy > 0){ sheet.style.transform = `translateY(${dy}px)`; }
+  };
+  const onEnd = () => {
+    if(!active) return;
+    active = false;
+    const dy = curY - startY;
+    sheet.style.transition = 'transform 0.3s ease';
+    if(dy > 60){
+      sheet.style.transform = `translateY(100%)`;
+      setTimeout(()=>{
+        popup.classList.remove('show');
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+      }, 300);
+    } else {
+      sheet.style.transform = '';
+      setTimeout(()=>{ sheet.style.transition = ''; }, 300);
     }
-  });
-})();
+  };
+
+  sheet.addEventListener('touchstart', onStart, {passive:true});
+  sheet.addEventListener('touchmove',  onMove,  {passive:true});
+  sheet.addEventListener('touchend',   onEnd,   {passive:true});
+
+  // Also close on backdrop tap
+  popup.addEventListener('click', e=>{ if(e.target===popup) onEnd.call(null, {changedTouches:[{clientY: startY+100}]}); });
+}
+initSwipeClose();
 </script>
 </body>
 </html>
