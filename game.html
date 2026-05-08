@@ -680,6 +680,14 @@ async function startShuffleGame(){
 function pickCup(n){
   if(gamePhase!=='picking') return;
   gamePhase='revealing';
+
+  // Update prize text to show ACTUAL won amount before cup lifts
+  const actualWon = spinResults[spinCount] ?? 50;
+  [1,2,3].forEach(i=>{
+    const prizeEl = document.querySelector('#cw'+i+' .cup-prize');
+    if(prizeEl) prizeEl.textContent = i===n ? '₹'+actualWon : '';
+  });
+
   // Dim other cups, highlight picked
   [1,2,3].forEach(i=>{
     const el=document.getElementById('cw'+i);
@@ -858,7 +866,7 @@ document.addEventListener('visibilitychange', ()=>{
     const { id, ts } = pendingJoin;
     const elapsed = Date.now() - ts;
 
-    if(elapsed < 5000){
+    if(elapsed < 3000){
       // Came back too fast — reset button, show error
       const btn = document.getElementById('cb'+id);
       if(btn){

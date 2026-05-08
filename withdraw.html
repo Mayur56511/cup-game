@@ -249,6 +249,13 @@ function submitWithdraw(){
     });
     localStorage.setItem('wdHistory', JSON.stringify(history));
 
+    // Clear game balance & reset so user can't re-withdraw
+    localStorage.setItem('bal', '0');
+    localStorage.setItem('spinCount', '0');
+    localStorage.setItem('pts', '1');
+    localStorage.setItem('channelBatch', '0');
+    localStorage.setItem('joined', '[]');
+
     // Also track in Firebase
     db.ref('cupGame/stats/withdrawals').push({
       amt: bal, upi: upi, name: name,
